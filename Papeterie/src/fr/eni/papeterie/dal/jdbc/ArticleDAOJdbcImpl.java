@@ -35,6 +35,7 @@ public class ArticleDAOJdbcImpl {
 	private static final String STYLO = "STYLO";
 	
 	
+	
 	//Méthodes	
 	public Article selectById(int id)  throws DALException {
 		

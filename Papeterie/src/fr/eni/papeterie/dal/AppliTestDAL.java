@@ -24,6 +24,7 @@ public class AppliTestDAL {
 		System.out.println("Ajout des articles... ");
 		//TODO...
 		try {
+			
 						
 			articleDAO.insert(a1);
 			System.out.println("Article ajouté  : " + a1.toString() );

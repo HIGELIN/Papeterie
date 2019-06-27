@@ -4,7 +4,6 @@
 package fr.eni.papeterie.dal.jdbc;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,18 +12,18 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDriver;
-
 import fr.eni.papeterie.bo.Article;
 import fr.eni.papeterie.bo.Ramette;
 import fr.eni.papeterie.bo.Stylo;
+import fr.eni.papeterie.dal.ArticleDAO;
 import fr.eni.papeterie.dal.DALException;
+import fr.eni.papeterie.dal.jdbc.JdbcTools;
 
 /**
  * @author Eni Ecole
  * 
  */
-public class ArticleDAOJdbcImpl {
+public class ArticleDAOJdbcImpl implements ArticleDAO {
 	
 	private static final String SQL_SELECT_BY_ID = "select idArticle, reference, marque, designation, prixUnitaire, qteStock, grammage, couleur, type from Articles where idArticle = ?";
 	private static final String SQL_INSERT = "insert into articles(reference, marque, designation, prixUnitaire, qteStock, grammage, couleur, type) values (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -45,13 +44,10 @@ public class ArticleDAOJdbcImpl {
 		Article article = null;
 		
 		try {
-			// Chargement du pilote Jdbc
-			DriverManager.registerDriver(new SQLServerDriver());
 			
 			//Obtenir une connection
-			String url = "jdbc:sqlserver://localhost:1433;databaseName=PAPETERIE_DB";
-			uneConnection = DriverManager.getConnection(url, "sa", "Pa$$w0rd");
-								
+			uneConnection = JdbcTools.getConnection();
+			
 			rqt = uneConnection.prepareStatement(SQL_SELECT_BY_ID);
 			
 			rqt.setInt(1, id);
@@ -90,13 +86,12 @@ public class ArticleDAOJdbcImpl {
 	}
 		
 	
+	
 	public List<Article> selectAll() throws DALException {
 	
-		
 		List<Article> listeArticle = new ArrayList<>();
-		String url = "jdbc:sqlserver://localhost:1433;databaseName=PAPETERIE_DB";
 		
-		try (Connection uneConnection = DriverManager.getConnection(url, "sa", "Pa$$w0rd"); Statement stmt = uneConnection.createStatement();) {
+		try (Connection uneConnection = JdbcTools.getConnection(); Statement stmt = uneConnection.createStatement();) {
 					//try puis () : permet de gérer automatiquement la fermeture de ces deux connections
 			
 			ResultSet rs = stmt.executeQuery(SQL_SELECT_ALL);
@@ -120,24 +115,22 @@ public class ArticleDAOJdbcImpl {
 					listeArticle.add(article);
 				}
 			}
-						
-
+		
 		} catch (SQLException e) {
 			throw new DALException("selectAll failed - ", e);
 		} 
 		
-	
 		return listeArticle;
 	}
-		
+	
+	
 	
 	public boolean update(Article article) throws DALException {
 		
-		String url = "jdbc:sqlserver://localhost:1433;databaseName=PAPETERIE_DB";
-		
+				
 		boolean resultat = false;
 				
-		try (Connection uneConnection = DriverManager.getConnection(url, "sa", "Pa$$w0rd"); PreparedStatement rqt = uneConnection.prepareStatement(SQL_UPDATE);) {
+		try (Connection uneConnection = JdbcTools.getConnection(); PreparedStatement rqt = uneConnection.prepareStatement(SQL_UPDATE);) {
 			
 			rqt.setString(1, article.getReference());
 			rqt.setString(2, article.getMarque());
@@ -173,12 +166,9 @@ public class ArticleDAOJdbcImpl {
 		
 		
 		try {
-			//Chargement du driver Jdbc
-			DriverManager.registerDriver(new SQLServerDriver());
-			
+						
 			//Ouverture de la connection à la base de données
-			String url = "jdbc:sqlserver://127.0.0.1;databaseName=PAPETERIE_DB";
-			uneConnection = DriverManager.getConnection(url, "sa", "Pa$$w0rd");
+			uneConnection = JdbcTools.getConnection();
 			
 			//Création de la requete
 			pStmt = uneConnection.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
@@ -229,8 +219,7 @@ public class ArticleDAOJdbcImpl {
 	
 	public void delete(int idArticle) throws DALException {
 		
-		String url = "jdbc:sqlserver://127.0.0.1;databaseName=PAPETERIE_DB";
-		try (Connection uneConnection = DriverManager.getConnection(url, "sa", "Pa$$w0rd"); PreparedStatement rqt = uneConnection.prepareStatement(SQL_DELETE);) {
+		try (Connection uneConnection = JdbcTools.getConnection(); PreparedStatement rqt = uneConnection.prepareStatement(SQL_DELETE);) {
 		
 			rqt.setInt(1,  idArticle);
 			rqt.executeUpdate();
